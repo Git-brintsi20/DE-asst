@@ -1,0 +1,19 @@
+# Snowflake connector for Part B (ELT)
+snowflake-connector-python>=3.0.0
+
+# ML and data for Part C (Mage/Iris)
+scikit-learn>=1.3.0
+pandas>=2.0.0
+joblib>=1.3.0
+
+# Mage orchestration for Part C
+mage-ai>=0.9.0
+
+# RabbitMQ client for Part D (stream)
+pika>=1.3.0
+
+# Testing for Part A (CI)
+pytest>=7.4.0
+
+# Utilities
+python-dotenv>=1.0.0

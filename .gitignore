@@ -1,0 +1,29 @@
+# Secrets - never commit these
+.env
+
+# Model files
+*.pkl
+
+# Data files (submit via screenshot or table in report instead)
+*.csv
+
+# Mage log
+mage.log
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyo
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Jupyter checkpoints
+.ipynb_checkpoints/
+
+# OS
+.DS_Store
+Thumbs.db
