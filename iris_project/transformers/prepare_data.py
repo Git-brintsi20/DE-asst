@@ -1,19 +1,22 @@
 # iris_project/transformers/prepare_data.py
 # Part C1 / A3: transformer block — splits Iris into train (80%) and test (20%).
-# This file is imported directly by tests/test_prepare_data.py in the CI run,
-# so it must work outside Mage. The 'if not in globals()' guard makes that safe.
+#
+# HOW THE DUAL-MODE IMPORT WORKS:
+# - Inside Mage: `mage run` pre-injects `transformer` and `test` into the exec()
+#   namespace before running this file. So 'transformer' IS in globals() already.
+#   The if-guard is False, no import runs, Mage's collector picks up @transformer.
+# - Outside Mage (pytest): 'transformer' is NOT in globals(), so we import from
+#   mage_ai (or fall back to pass-through). pytest can call transform() directly.
 
 import pandas as pd
 from sklearn.model_selection import train_test_split
 
-try:
-    from mage_ai.data_preparation.decorators import transformer, test
-except ImportError:
-    # Running outside Mage (e.g. in pytest): provide no-op decorators
-    def transformer(fn):
-        return fn
-    def test(fn):
-        return fn
+if 'transformer' not in dir():
+    try:
+        from mage_ai.data_preparation.decorators import transformer, test
+    except ImportError:
+        def transformer(fn): return fn  # noqa
+        def test(fn): return fn  # noqa
 
 
 @transformer

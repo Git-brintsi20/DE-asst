@@ -1,27 +1,21 @@
 # iris_project/data_loaders/load_iris.py
 # Part C1: data_loader block — brings the Iris dataset into the pipeline.
-# Works both inside Mage and in plain Python (the CI test imports prepare_data,
-# which only needs transform(), so this file just needs to be importable).
 
 import pandas as pd
-from sklearn.datasets import load_iris
+from sklearn.datasets import load_iris as _load_iris
 
-# Import Mage's decorators only if they aren't already loaded (makes the file
-# importable outside Mage, e.g. in pytest, without installing mage-ai).
-if 'data_loader' not in globals():
-    from mage_ai.data_preparation.decorators import data_loader
-if 'test' not in globals():
-    from mage_ai.data_preparation.decorators import test
+if 'data_loader' not in dir():
+    try:
+        from mage_ai.data_preparation.decorators import data_loader, test
+    except ImportError:
+        def data_loader(fn): return fn  # noqa
+        def test(fn): return fn  # noqa
 
 
 @data_loader
 def load_data(*args, **kwargs):
-    """Load the built-in Iris dataset as a pandas DataFrame.
-    
-    Returns 150 rows × 5 columns: four measurements + 'target' (0/1/2).
-    Mage passes this automatically to the next block (prepare_data).
-    """
-    iris = load_iris(as_frame=True)
+    """Load the built-in Iris dataset as a pandas DataFrame (150 rows × 5 cols)."""
+    iris = _load_iris(as_frame=True)
     df = iris.frame
     print(f"Loaded {len(df)} rows, {df.shape[1]} columns")
     return df
@@ -29,7 +23,7 @@ def load_data(*args, **kwargs):
 
 @test
 def test_output(output, *args) -> None:
-    """Check: 150 rows, 5 columns, no missing values."""
+    """Check: 150 rows, 5 columns, no missing values, 3 classes."""
     assert output is not None, "Output is None"
     assert len(output) == 150, f"Expected 150 rows, got {len(output)}"
     assert output.shape[1] == 5, f"Expected 5 columns, got {output.shape[1]}"
