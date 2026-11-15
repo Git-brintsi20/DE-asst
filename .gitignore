@@ -27,3 +27,7 @@ env/
 # OS
 .DS_Store
 Thumbs.db
+
+# Personal study notes — not for submission
+VIVA_CHEAT_SHEET.md
+ASSIGNMENT_CHECKLIST.md
