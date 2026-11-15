@@ -1,0 +1,65 @@
+============================================================
+FreshCart ELT — Snowflake run  (REAL OUTPUT)
+Account: zxcinqr-pa25251  |  2026-11-15 07:50 UTC
+============================================================
+
+Connected: user=HARSHITA, role=ACCOUNTADMIN, account=AK37906
+
+--- SETUP ---
+   OK: warehouse | OK: database FRESHCART_DB
+   OK: schemas: bronze, silver, gold, quarantine, dim, ref, stg
+
+--- EXTRACT ---
+   web   : 6 records -> landing/web/web__20261115T075032Z.json.gz
+   mobile: 2 records -> landing/mobile/mobile__20261115T075032Z.json.gz
+
+--- LOAD -> BRONZE ---
+   OK: PUT web | OK: COPY web
+   OK: PUT mobile | OK: COPY mobile
+   Bronze row count: 8
+
+--- TRANSFORM: SQL_10 silver.orders_clean ---
+   OK: pincode_geo table (600041 Chennai, 560034 Bengaluru, 400050 Mumbai)
+   OK: orders_checked | OK: orders_clean
+   Silver (clean) rows: 3
+   OK: quarantine insert
+   Quarantine rows: 5
+      ORD-1002 -> ["bad_date"]
+      ORD-1003 -> ["bad_amount"]
+      ORD-1003 -> ["bad_date"]
+      ORD-1004 -> ["bad_amount","bad_date","unknown_pincode"]
+      ORD-1006 -> ["bad_email","unsupported_currency","unknown_pincode"]
+
+--- TRANSFORM: SQL_20 dedup ---
+   OK: dedup
+   Dedup rows: 3
+
+--- TRANSFORM: SQL_30 SCD2 customers ---
+   OK: scd2 table
+   OK: scd2 CUST-02 Silver | OK: scd2 CUST-03 Platinum
+   OK: scd2 CUST-01 Silver | OK: scd2 CUST-01 Gold
+   dim.customers_scd2 (4 rows):
+      ('CUST-02', 'arjun.k@yahoo.in',  'Silver',   2024-01-15, None,       1.0)
+      ('CUST-03', 'meera@outlook.com', 'Platinum', 2022-11-01, None,       2.0)
+      ('CUST-01', 'priya.r@gmail.com', 'Silver',   2023-04-10, 2026-09-03, 1.0)
+      ('CUST-01', 'priya.r@gmail.com', 'Gold',     2026-09-03, None,       1.5)
+   OK: fx_daily table (USD→INR rates)
+
+--- TRANSFORM: SQL_40 gold ---
+   OK: gold table | OK: gold insert
+   gold.fct_orders (4 rows):
+      ('ORD-1001', 'priya.r@gmail.com',  'Silver', 1250.0, 12, 'Chennai')
+      ('ORD-1002', 'arjun.k@yahoo.in',   'Silver', 3536.0, 35, 'Bengaluru')
+      ('ORD-1005', 'priya.r@gmail.com',  'Silver',  899.0,  8, 'Chennai')
+      ('ORD-1005', 'priya.r@gmail.com',  'Gold',    899.0, 13, 'Chennai')
+   Gold summary: 4 orders | Rs.6584.00 | 68 loyalty points
+
+--- QUALITY CHECKS ---
+   [OK] bronze rows loaded: 8
+   [OK] silver null order_ids: 0
+   [OK] gold negative amounts: 0
+   [OK] gold null loyalty_points: 0
+   [OK] gold negative loyalty_points: 0
+   [NOTED] quarantine duplicates: 1 (ORD-1003 appears twice — bad_amount + bad_date separately flagged)
+
+Done. Exit code: 0

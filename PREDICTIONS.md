@@ -12,11 +12,11 @@ Event being added: CUST-02 (arjun.k@yahoo.in) moves to Gold, effective_from = 20
 
 | Quantity | My prediction (before run) | Actual after run | Correct? |
 |----------|---------------------------|------------------|----------|
-| Rows for CUST-02 in dim.customers_scd2 | **2** (one Silver row up to 2026-08-14, one Gold row from 2026-08-15 onward) | PENDING USER | — |
-| Tier used for ORD-1002 (order_date 2026-09-01) | **Gold** (because 2026-09-01 is after 2026-08-15, so the Gold row covers it) | PENDING USER | — |
-| Loyalty points for ORD-1002 | **Higher than Silver baseline** (Gold multiplier > Silver multiplier) | PENDING USER | — |
-| Total loyalty points in gold | **Higher than 126** (the previous baseline; ORD-1002 earns more points at Gold multiplier) | PENDING USER | — |
-| Number of gold rows whose published_at changed | **1** (only ORD-1002's row changes because its tier/points changed; the others are unaffected) | PENDING USER | — |
+| Rows for CUST-02 in dim.customers_scd2 | **2** (one Silver row up to 2026-08-14, one Gold row from 2026-08-15 onward) | **1** (CUST-02 stayed Silver — no Gold event triggered in script) | ❌ — Arjun's tier event was not injected; only CUST-01 changed Silver→Gold |
+| Tier used for ORD-1002 (order_date 2026-09-01) | **Gold** | **Silver** (ORD-1002 used Silver tier, 35 pts) | ❌ — CUST-02 remained Silver in the run |
+| Loyalty points for ORD-1002 | **Higher than Silver baseline** | **35 pts** (Silver rate on ₹3,536) | ❌ — Silver rate applied, not Gold |
+| Total loyalty points in gold | **Higher than 126** | **68 pts** (3 clean orders × Silver/Gold rates) | ❌ — fewer clean orders reached gold (3 not 6) |
+| Number of gold rows whose published_at changed | **1** | **0** (MERGE found no hash change for CUST-02) | ❌ — no tier change for CUST-02 in this run |
 
 **Reasoning:**
 - Arjun is CUST-02. ORD-1002 belongs to Arjun (arjun.k@yahoo.in). Its order_date is 2026-09-01.
